@@ -17,7 +17,7 @@ clone-ci-repo:
 	@echo "==================== clone-ci-repo ===================="
 	@echo
 	@if [ ! -d "$(CI_REPO_PATH)" ]; then \
-		git clone https://github.com/EncoreTechnologies/ci-python.git --depth 1 --single-branch --branch $(CI_REPO_BRANCH) $(CI_REPO_PATH); \
+		git clone https://github.com/EncoreTechnologies/ci-django.git --depth 1 --single-branch --branch $(CI_REPO_BRANCH) $(CI_REPO_PATH); \
 	else \
 		cd $(CI_REPO_PATH); \
 		git pull;
