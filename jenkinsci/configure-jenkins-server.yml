@@ -1,0 +1,19 @@
+---
+- name: Configure Jenkins server
+  hosts: jenkinsservers
+  vars:
+    jenkins_hostname: "{{inventory_hostname}}"
+    jenkins_package_state: latest
+    jenkins_admin_password: jenkins-password
+    jenkins_connection_retries: 5
+    jenkins_plugins: ['pipeline-model-declarative-agent', 'bouncycastle-api', 'branch-api', 'pipeline-build-step', 'external-monitor-job', 'credentials-binding', 'validating-string-parameter', 'pipeline-model-api', 'git', 'mercurial', 'conditional-buildstep', 'pipeline-input-step', 'pipeline-model-extensions', 'ant', 'javadoc', 'authentication-tokens', 'scm-api', 'pipeline-stage-tags-metadata', 'antisamy-markup-formatter', 'ws-cleanup', 'display-url-api', 'job-import-plugin', 'timestamper', 'ldap', 'gradle', 'email-ext', 'jquery', 'pipeline-stage-view', 'jquery-detached', 'workflow-aggregator', 'config-file-provider', 'token-macro', 'workflow-support', 'build-pipeline-plugin', 'parameterized-trigger', 'ssh-credentials', 'cloudbees-folder', 'docker-workflow', 'workflow-job', 'script-security', 'pam-auth', 'durable-task', 'structs', 'workflow-cps-global-lib', 'github-branch-source', 'build-timeout', 'jackson2-api', 'pipeline-rest-api', 'pipeline-github-lib', 'github-api', 'credentials', 'docker-commons', 'handlebars', 'resource-disposer', 'git-client', 'workflow-scm-step', 'workflow-api', 'pipeline-model-definition', 'git-server', 'matrix-auth', 'dashboard-view', 'workflow-cps', 'workflow-durable-task-step', 'plain-credentials', 'ssh-slaves', 'pipeline-graph-analysis', 'github', 'momentjs', 'run-condition', 'ssh', 'pipeline-milestone-step', 'github-organization-folder', 'junit', 'windows-slaves', 'workflow-basic-steps', 'docker-plugin', 'ace-editor', 'git-parameter', 'workflow-multibranch', 'bitbucket', 'icon-shim', 'workflow-step-api', 'matrix-project', 'maven-plugin', 'pipeline-stage-step', 'mailer']
+    jenkins_jobs: [{name: 'Deploy - CloudForms to Dev', config: "{{ lookup('file', './cloudforms_dev.xml') }}"}, {name: 'docker-pipeline', config: "{{ lookup('file', './docker_pipeline.xml') }}"}]
+    java_packages:
+      - java-1.8.0-openjdk
+  tasks:
+  - name: Install docker with yum
+    yum:
+      name: "docker"
+      state: present
+  roles:
+    - geerlingguy.jenkins

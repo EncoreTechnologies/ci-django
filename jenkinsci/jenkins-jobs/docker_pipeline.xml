@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.13">
+  <actions/>
+  <description/>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>GIT_REPO</name>
+          <description/>
+          <defaultValue>git@bitbucket.org:encoretech/stackstorm.git</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>Server_Uri</name>
+          <description/>
+          <defaultValue>tcp://nor1devdoc01.dev.encore.tech/</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>Docker_Image</name>
+          <description/>
+          <defaultValue>jenkins-python</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>Docker_Build_Tag</name>
+          <description/>
+          <defaultValue>latest</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers/>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.36">
+    <script>
+      node {
+          // Setup the Docker Registry (Docker Hub) + Credentials 
+          def registry_url = "${Server_Uri}" // Docker Hub
+          def build_tag = "${Docker_Build_Tag}" // default tag to push for to the registry
+          def container_name = "${Docker_Image}"
+        
+          stage("Connecting to Docker Server") {
+              echo "logging into ${registry_url}"
+
+              docker.withServer("${registry_url}") {
+                  stage("Building Container") {
+                      echo "Image ${container_name}"
+                      def container = docker.image("${container_name}:${build_tag}")
+                      container.withRun("--name=${container_name}") {
+                          stage("Checkout Repo") {
+                              //sh "docker exec -t ${container_name} git clone git@bitbucket.org:encoretech/stackstorm.git /root/git_project"
+                              sh "docker exec -t ${container_name} git clone ${GIT_REPO} /root/git_project"
+                          }
+                          stage("Running Make Tests") {
+                              sh "docker exec -t ${container_name} bash -c 'cd /root/git_project/; make'"
+                          }
+                      }
+                  }
+              }
+          }
+          currentBuild.result = 'SUCCESS'  
+      }
+    </script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
