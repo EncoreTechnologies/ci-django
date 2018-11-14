@@ -2,7 +2,6 @@ THIS_FILE := $(lastword $(MAKEFILE_LIST))
 ROOT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 CI_REPO_PATH ?= $(ROOT_DIR)/ci
 CI_REPO_BRANCH ?= master
-export PYMODULE_NAME := $(shell python setup.py --name)
 
 .PHONY: all
 all: .DEFAULT
@@ -20,7 +19,7 @@ clone-ci-repo:
 		git clone https://github.com/EncoreTechnologies/ci-django.git --depth 1 --single-branch --branch $(CI_REPO_BRANCH) $(CI_REPO_PATH); \
 	else \
 		cd $(CI_REPO_PATH); \
-		git pull;
+		git pull; \
 	fi;
 
 # Clean the ci-repo (calling `make clean` in that directory), then remove the
